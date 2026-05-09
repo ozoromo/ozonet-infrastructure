@@ -1,0 +1,80 @@
+name: OpenTofu
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+  SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+  SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+  SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+
+jobs:
+  tofu:
+    name: fmt / validate / plan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.9.0"
+          tofu_wrapper: false
+
+      - name: tofu fmt
+        run: tofu fmt -check -recursive -diff
+
+      - name: tofu init
+        run: tofu init -backend=false
+
+      - name: tofu validate
+        run: tofu validate -no-color
+
+      - name: tofu plan
+        if: github.event_name == 'pull_request'
+        id: plan
+        run: tofu plan -no-color -lock=false
+        continue-on-error: true
+
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          PLAN_STDOUT: ${{ steps.plan.outputs.stdout }}
+          PLAN_STDERR: ${{ steps.plan.outputs.stderr }}
+          PLAN_OUTCOME: ${{ steps.plan.outcome }}
+        with:
+          script: |
+            const out = (process.env.PLAN_STDOUT || '').slice(0, 60000);
+            const err = (process.env.PLAN_STDERR || '').slice(0, 5000);
+            const body = [
+              `### OpenTofu plan \`${process.env.PLAN_OUTCOME}\``,
+              '',
+              '<details><summary>Show plan</summary>',
+              '',
+              '```hcl',
+              out || '(no output)',
+              '```',
+              err ? `\n**stderr**\n\n\`\`\`\n${err}\n\`\`\`` : '',
+              '</details>',
+            ].join('\n');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+
+      - name: Fail if plan errored
+        if: github.event_name == 'pull_request' && steps.plan.outcome == 'failure'
+        run: exit 1
