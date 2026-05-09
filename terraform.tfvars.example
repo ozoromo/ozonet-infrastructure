@@ -1,0 +1,6 @@
+scaleway_access_key      = "SCWXXXXXXXXXXXXXXXXX"
+scaleway_secret_key      = "11111111-2222-3333-4444-555555555555"
+scaleway_project_id      = "11111111-2222-3333-4444-555555555555"
+scaleway_organization_id = "11111111-2222-3333-4444-555555555555"
+scaleway_region          = "fr-par"
+scaleway_zone            = "fr-par-1"
