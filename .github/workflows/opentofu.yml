@@ -40,7 +40,7 @@ jobs:
         run: tofu fmt -check -recursive -diff
 
       - name: tofu init
-        run: tofu init -backend=false
+        run: tofu init
 
       - name: tofu validate
         run: tofu validate -no-color
