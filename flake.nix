@@ -29,6 +29,13 @@
           files = "\\.tf$";
           language = "system";
         };
+        hooks.tofu-validate = {
+          enable = true;
+          name = "tofu validate";
+          entry = "${pkgs.opentofu}/bin/tofu validate";
+          files = "\\.tf$";
+          language = "system";
+        };
       };
   in {
     checks = forAllSystems ({
