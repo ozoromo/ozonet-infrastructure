@@ -1,3 +1,10 @@
+resource "scaleway_iam_ssh_key" "authorized" {
+  for_each = var.ssh_authorized_keys
+
+  name       = each.key
+  public_key = each.value
+}
+
 resource "scaleway_instance_ip" "prod_secure_1" {
   type = "routed_ipv4"
 }

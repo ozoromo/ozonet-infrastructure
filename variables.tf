@@ -35,3 +35,11 @@ variable "scaleway_zone" {
   type        = string
   default     = "fr-par-2"
 }
+
+variable "ssh_authorized_keys" {
+  description = "SSH public keys registered at the Scaleway project level. Propagated to every instance in the project at provisioning time."
+  type        = map(string)
+  default = {
+    "dev.ozoromo@proton.me" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAV+2yLq/Q1o4hm7S8vqVdFuXGF0xtZ3o7D2/ZP+GOCw dev.ozoromo@proton.me"
+  }
+}
