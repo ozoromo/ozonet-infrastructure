@@ -15,4 +15,6 @@ resource "scaleway_instance_server" "prod_secure_1" {
   image     = "debian_bookworm"
   ip_ids    = [scaleway_instance_ip.prod_secure_1.id]
   protected = true
+
+  depends_on = [scaleway_iam_ssh_key.authorized]
 }

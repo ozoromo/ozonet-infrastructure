@@ -35,6 +35,7 @@
           entry = "${pkgs.opentofu}/bin/tofu validate";
           files = "\\.tf$";
           language = "system";
+          pass_filenames = false;
         };
       };
   in {
