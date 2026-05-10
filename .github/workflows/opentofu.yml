@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -45,7 +46,7 @@ jobs:
         run: tofu validate -no-color
 
       - name: tofu plan
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
         id: plan
         run: tofu plan -no-color -lock=false
         continue-on-error: true
@@ -80,5 +81,5 @@ jobs:
             });
 
       - name: Fail if plan errored
-        if: github.event_name == 'pull_request' && steps.plan.outcome == 'failure'
+        if: (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && steps.plan.outcome == 'failure'
         run: exit 1
